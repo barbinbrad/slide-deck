@@ -1,5 +1,4 @@
 import { ChakraProvider } from "@chakra-ui/react";
-import "./App.css";
 import {
   FullScreenVideo,
   Slides,
@@ -8,8 +7,9 @@ import {
   TemperatureGraph,
 } from "./components";
 import MoistureGraph from "./components/MoistureGraph";
+import "./Presentation.css";
 
-function App() {
+const Presentation = () => {
   return (
     <ChakraProvider>
       <Slides>
@@ -91,6 +91,6 @@ function App() {
       </Slides>
     </ChakraProvider>
   );
-}
+};
 
-export default App;
+export default Presentation;
