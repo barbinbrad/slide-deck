@@ -13,6 +13,8 @@ const Presentation = () => {
   return (
     <ChakraProvider>
       <Slides>
+        <Slide type="black" />
+
         <Slide>
           <h1>Steak</h1>
           <img className="small" src="/assets/beef.png" alt="steak" />

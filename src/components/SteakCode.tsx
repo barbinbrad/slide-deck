@@ -42,7 +42,7 @@ class Steak {
 
   sear(temperature: number) {
     if (temperature > this.temperature) {
-      this.temperature += 3;
+      this.temperature += 10;
     }
   }
 
@@ -76,9 +76,9 @@ class Steak {
 
   sear(temperature: number) {
     if (temperature > this.temperature) {
-      this.temperature += 3;
+      this.temperature += 10;
     }
-    this.externalMoisture -= 10;
+    this.externalMoisture -= 15;
   }
 
 }
