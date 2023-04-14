@@ -48,6 +48,41 @@ class Steak {
 
 }
   `,
+  3: `// Steak.ts
+
+class Steak {
+  constructor(
+    thickness: number, 
+    temperature: number
+  ) {
+    this.thickness = thickness;
+    this.temperature = temperature;
+    this.externalMoisture = 80;
+    this.crispiness = 0;
+  }
+
+  sousVide(temperature: number) {
+    if (temperature > this.temperature) {
+      this.temperature += 1;
+    }
+  }
+
+  bake(temperature: number) {
+    if (temperature > this.temperature) {
+      this.temperature += 2;
+    }
+    this.externalMoisture -= 2;
+  }
+
+  sear(temperature: number) {
+    if (temperature > this.temperature) {
+      this.temperature += 3;
+    }
+    this.externalMoisture -= 10;
+  }
+
+}
+  `,
 };
 
 const SteakCode = ({ config }: { config: number }) => {

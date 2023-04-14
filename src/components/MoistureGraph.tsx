@@ -4,11 +4,7 @@ import {
   FormLabel,
   Grid,
   Heading,
-  Slider,
-  SliderFilledTrack,
-  SliderMark,
-  SliderThumb,
-  SliderTrack,
+  Select,
   VStack,
 } from "@chakra-ui/react";
 import { AxisBottom } from "@visx/axis";
@@ -21,99 +17,47 @@ import { scaleLinear } from "@visx/scale";
 import { AreaClosed, LinePath } from "@visx/shape";
 import { ParentSize } from "@visx/responsive";
 import { useRef, useState } from "react";
-import { BsFire } from "react-icons/bs";
-import { TbRulerMeasure } from "react-icons/tb";
 import { AnimatedAxis, AnimatedGridRows } from "@visx/react-spring";
 
-const TemperatureGraph = () => {
-  const [temperature, setTemperature] = useState(500);
-  const [thickness, setThickness] = useState(0.75);
+enum Method {
+  Grill = "grill",
+  SousVide = "sous-vide",
+  Oven = "oven",
+}
 
-  const timeWindowInMinutes =
-    7.5 / getTemperatureChangeSlope(thickness, temperature);
-
-  // convert time to seconds if it's less than 2 minutes
-  let timeWindow = (
-    timeWindowInMinutes < 2 ? timeWindowInMinutes * 60 : timeWindowInMinutes
-  ).toFixed(0);
-  if (temperature < 130) timeWindow = "Infinite";
-  const timeUnit = timeWindowInMinutes < 2 ? "seconds" : "minutes";
+const MoistureGraph = () => {
+  const [method, setMethod] = useState(Method.SousVide);
 
   return (
     <Grid gridTemplateColumns={["1fr", "1fr", "2fr 5fr"]} w="full" h="full">
       <Box w="full" py={14} px={8} borderRight="1px solid #373737">
         <VStack spacing={12}>
           <FormControl>
-            <FormLabel color="white">Temperature (°F)</FormLabel>
-            <Heading color="white">{`${temperature} °F`}</Heading>
-            <Slider
-              id="slider"
-              defaultValue={temperature}
-              min={75}
-              max={700}
-              step={25}
-              onChange={(v) => setTemperature(v)}
+            <FormLabel color="white">Method</FormLabel>
+            <Heading color="white" mb={4}>
+              {method}
+            </Heading>
+            <Select
+              value={method}
+              placeholder="Select method"
+              onChange={(e) => setMethod(e.target.value as Method)}
+              color="white"
             >
-              <SliderMark value={100} mt={3} ml={-2.5} color="white">
-                100
-              </SliderMark>
-              <SliderMark value={300} mt={3} ml={-2.5} color="white">
-                300
-              </SliderMark>
-              <SliderMark value={500} mt={3} ml={-2.5} color="white">
-                500
-              </SliderMark>
-              <SliderTrack bg="red.100">
-                <SliderFilledTrack bg="tomato" />
-              </SliderTrack>
-              <SliderThumb boxSize={6}>
-                <Box color="tomato" as={BsFire} />
-              </SliderThumb>
-            </Slider>
-          </FormControl>
-          <FormControl>
-            <FormLabel color="white">Thickness (inches)</FormLabel>
-            <Heading color="white">{`${thickness}"`}</Heading>
-            <Slider
-              id="slider"
-              defaultValue={thickness}
-              min={0.5}
-              max={3}
-              step={0.25}
-              onChange={(v) => setThickness(v)}
-            >
-              <SliderMark value={0.75} mt={3} ml={-2.5} color="white">
-                .75
-              </SliderMark>
-              <SliderMark value={1.5} mt={3} ml={-2.5} color="white">
-                1.5
-              </SliderMark>
-              <SliderMark value={2.25} mt={3} ml={-2.5} color="white">
-                2.25
-              </SliderMark>
-              <SliderTrack bg="red.100">
-                <SliderFilledTrack bg="tomato" />
-              </SliderTrack>
-              <SliderThumb boxSize={6}>
-                <Box color="tomato" as={TbRulerMeasure} />
-              </SliderThumb>
-            </Slider>
-          </FormControl>
-          <FormControl>
-            <FormLabel color="white">Time Window (minutes)</FormLabel>
-            <Heading color="white">{`${timeWindow} ${timeUnit}`}</Heading>
+              <option value={Method.Grill}>Grill/Pan</option>
+              <option value={Method.SousVide}>Sous Vide</option>
+              <option value={Method.Oven}>Oven</option>
+            </Select>
           </FormControl>
         </VStack>
       </Box>
       <Box p={8}>
         <ParentSize>
           {({ height, width }) => (
-            <TemperatureChart
+            <MoistureChart
               parentHeight={height}
               parentWidth={width}
-              slope={getTemperatureChangeSlope(thickness, temperature)}
-              intercept={50}
-              max={temperature}
+              slope={getMoistureChangeSlope(method)}
+              intercept={80}
             />
           )}
         </ParentSize>
@@ -122,47 +66,45 @@ const TemperatureGraph = () => {
   );
 };
 
-export default TemperatureGraph;
+export default MoistureGraph;
 
 // Multi-variate linear regression didn't fit the data very well
-// until I added a temperature/thickness ratio instead of just
-// the temperature and thickness variables.
+// until I added a moisture/thickness ratio instead of just
+// the moisture and thickness variables.
 
-function getTemperatureChangeSlope(thickness: number, temperature: number) {
-  // SUPER, SUPER, rough estimate
-  const thicknessWeight = 0.018794918;
-  const temperatureWeight = 0.006954229;
-  const intercept = -1.539526048;
-
-  return (
-    thicknessWeight * (temperature / thickness) +
-    temperatureWeight * temperature +
-    intercept
-  );
+function getMoistureChangeSlope(method: Method) {
+  switch (method) {
+    case Method.Grill:
+      return -15;
+    case Method.SousVide:
+      return 0;
+    case Method.Oven:
+      return -1;
+    default:
+      throw new Error("Invalid method");
+  }
 }
 
-type TemperatureProps = {
+type MoistureProps = {
   parentHeight: number;
   parentWidth: number;
   slope: number;
   intercept: number;
-  max: number;
   margin?: { top: number; right: number; bottom: number; left: number };
 };
 
 type Datum = {
   time: number;
-  temperature: number;
+  moisture: number;
 };
 
-const TemperatureChart = ({
+const MoistureChart = ({
   parentHeight,
   parentWidth,
   slope,
   intercept,
-  max,
   margin = { top: 10, right: 20, bottom: 80, left: 80 },
-}: TemperatureProps) => {
+}: MoistureProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
   const width = parentWidth - margin.left - margin.right;
@@ -170,11 +112,11 @@ const TemperatureChart = ({
 
   const data = Array.from(Array(100).keys()).map((i) => ({
     time: i,
-    temperature: getInternalTemperature(i, slope, intercept, max),
+    moisture: getExternalMoisture(i, slope, intercept),
   }));
 
   const x = (d: Datum) => d.time;
-  const y = (d: Datum) => d.temperature;
+  const y = (d: Datum) => d.moisture;
 
   const xScale = scaleLinear<number>({
     range: [0, width],
@@ -183,7 +125,7 @@ const TemperatureChart = ({
 
   const yScale = scaleLinear<number>({
     range: [height, 0],
-    domain: [0, max + 10],
+    domain: [0, 100],
   });
 
   return (
@@ -217,7 +159,7 @@ const TemperatureChart = ({
           fontSize={20}
           fill="#fff"
         >
-          Temperature (°F)
+          Surface Moisture (%)
         </text>
         <AnimatedAxis
           orientation="left"
@@ -243,8 +185,8 @@ const TemperatureChart = ({
         </text>
 
         <LinearGradient
-          id="fill"
-          from="#ff6347"
+          id="blue-fill"
+          from="#4784ff"
           to="#a6c1ee"
           fromOpacity={0.2}
           toOpacity={0}
@@ -264,7 +206,7 @@ const TemperatureChart = ({
           yScale={yScale}
           x={(d) => xScale(x(d))}
           y={(d) => yScale(y(d))}
-          fill="url(#fill)"
+          fill="url(#blue-fill)"
           curve={curveNatural}
         />
 
@@ -272,7 +214,7 @@ const TemperatureChart = ({
           data={data}
           y={(d) => yScale(y(d))}
           x={(d) => xScale(x(d))}
-          stroke="#ff6347"
+          stroke="#4784ff"
           strokeWidth={4}
           curve={curveNatural}
         />
@@ -281,11 +223,6 @@ const TemperatureChart = ({
   );
 };
 
-function getInternalTemperature(
-  time: number,
-  slope: number,
-  intercept: number,
-  max: number
-) {
-  return Math.min(slope * time + intercept, max);
+function getExternalMoisture(time: number, slope: number, intercept: number) {
+  return Math.max(slope * time + intercept, 0);
 }

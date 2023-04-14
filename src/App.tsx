@@ -7,6 +7,7 @@ import {
   SteakCode,
   TemperatureGraph,
 } from "./components";
+import MoistureGraph from "./components/MoistureGraph";
 
 function App() {
   return (
@@ -64,12 +65,20 @@ function App() {
           <h1>Finish</h1>
         </Slide>
 
+        <Slide>
+          <MoistureGraph />
+        </Slide>
+
         <Slide type="black">
           <img
             className="large"
             src="/assets/unfinished.jpg"
             alt="unfinished steak"
           />
+        </Slide>
+
+        <Slide>
+          <SteakCode config={3} />
         </Slide>
 
         <Slide type="black">
